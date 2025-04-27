@@ -1,0 +1,16 @@
+Hello, this is a test file.
+The quick brown fox jumps over the lazy dog.
+Hello world, welcome to the universe.
+Testing one two three.
+Search for the word apple in this sentence.
+This line has the word Hello.
+Hello world
+This is a test
+another test line
+HELLO AGAIN
+Don't match this line
+Testing one two three
+No match here.
+Another test line with apple.
+Does this contain apple or not?
+Hello, apple or maybe another word.
