@@ -1,48 +1,53 @@
 #!/bin/bash
-if [[ "$1" == "--help" ]]; then
+show_help(){
     echo "Usage: $0 [options] search_string filename"
     echo "Options:"
     echo "  -n    Show line numbers"
     echo "  -v    Invert match (show lines that do NOT match)"
-    echo "  --help Show this help message"
+    echo "  --help    Show this help message"
     exit 0
+}
+
+if [[ $1 == "--help" ]];then
+    show_help
 fi
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 search_string file_name [options]"
+show_line=false
+invert=false
+
+while getopts ":nv" opt; do
+    case $opt in
+        n)
+            show_line=true ;;
+        v)
+            invert=true ;;
+        \?)
+            echo "Invalid option"
+            exit 1 ;;
+    esac
+done
+
+shift $((OPTIND -1))
+
+# check for the correct of the word
+if [[ $1 == *.* ]];then
+    echo "The word can't be a file"
+    echo "Usage: $0 [options] search_string file_name"
     exit 1
 else
-    if [[ $1 == -* ]]; then
-        option=$1
-        if [[ ! $2 == *.txt ]];then
-                if [[ $3 == *.txt ]];then
-                        search_word=$2
-                        file_name=$3
-                else
-                        echo "insert file end with .txt"
-                        exit 1
-                fi
-        else
-                echo "Error: Missing or invalid search word. Usage: $0 search_string filename [options]"
-                exit 1
-        fi
-    else
-        option=""
-         if [[ ! $1 == *.txt ]];then
-                if [[ $2 == *.txt ]];then
-                        search_word=$1
-                        file_name=$2
-                else
-                        echo "insert file end with .txt"
-                        exit 1
-                fi
-        else
-                echo "Search word error , try again"
-                exit 1
-        fi
-    fi
+    search_word=$1
 fi
 
+# check for the extension of the text file
+if [[ $2 == *.txt ]];then
+    file_name=$2
+else
+    echo "The file should be a .txt file"
+    echo "Usage: $0 [options] search_string file_name"
+    exit 1
+fi
+
+# check if the text exists or not
 if [ ! -f "${file_name}" ]; then
     echo "File doesn't exist :("
     exit 1
@@ -51,22 +56,22 @@ fi
 line_number=0
 while IFS= read -r line
 do
-        ((line_number++))
-        if [[ ${option} == *v* ]];then
-                if [[ ! ${line} =~ ${search_word} ]];then
-                        if [[ ${option} == *n* ]];then
-                                echo "${line_number}:${line}"
-                        else
-                                echo "${line}"
-                        fi
-                fi
-        else
-                if [[ ${line} =~ ${search_word} ]];then
-                        if [[ ${option} == *n* ]];then
-                                echo "${line_number}:${line}"
-                        else
-                                echo "${line}"
-                        fi
-                fi
+    ((line_number++))
+    if [[ ${invert} == true ]];then
+        if [[ ! ${line,,} =~ ${search_word,,} ]];then
+            if [[ ${show_line} == true ]];then
+                echo "${line_number}:${line}"
+            else
+                echo "${line}"
+            fi
         fi
+    else
+        if [[ ${line,,} =~ ${search_word,,} ]];then
+            if [[ ${show_line} == true ]];then
+                echo "${line_number}:${line}"
+            else
+                echo "${line}"
+            fi
+        fi
+    fi
 done < "${file_name}"
